@@ -11,7 +11,11 @@
     "require": {
         "php": "^8.2",
         "laravel/framework": "^12.0",
-        "laravel/tinker": "^2.10.1"
+        "laravel/tinker": "^2.10.1",
+        "livewire/livewire": "^3.6",
+        "spatie/laravel-activitylog": "^4.10",
+        "spatie/laravel-permission": "^6.21",
+        "wireui/wireui": "^2.4"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
