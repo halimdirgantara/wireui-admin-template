@@ -75,7 +75,7 @@
                     <div class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer"
                          @click="userDropdown = !userDropdown">
                         <img class="w-8 h-8 rounded-full object-cover" 
-                             src="https://ui-avatars.com/api/?name={{ auth()->user()->name ?? 'Admin User' }}&background=3b82f6&color=ffffff" 
+                             src="{{ auth()->user()->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name ?? 'Admin User') . '&background=3b82f6&color=ffffff' }}" 
                              alt="User Avatar">
                         <div class="flex-1 min-w-0">
                             <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
