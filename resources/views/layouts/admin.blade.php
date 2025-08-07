@@ -185,7 +185,7 @@
             <!-- Page Content -->
             <main class="flex-1 overflow-y-auto p-6 space-y-6">
                 <div class="animate-fade-in">
-                    @yield('content')
+                    {{ $slot }}
                 </div>
             </main>
         </div>

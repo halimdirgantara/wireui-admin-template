@@ -1,16 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import '../../vendor/wireui/wireui/ts/global.css';
 @import 'tailwindcss';
 @plugin "@tailwindcss/forms";
-
 @source '../../vendor/wireui/wireui';
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../vendor/wireui/wireui/src/*.php';
-@source '../../vendor/wireui/wireui/ts/**/*.ts';
-@source '../../vendor/wireui/wireui/src/WireUi/**/*.php';
-@source '../../vendor/wireui/wireui/src/Components/**/*.php';
-@source '../../storage/framework/views/*.php';
-@source '../**/*.blade.php';
-@source '../**/*.js';
 
 @custom-variant dark (&:where(.dark, .dark *));
 
