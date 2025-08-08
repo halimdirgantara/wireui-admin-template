@@ -26,11 +26,10 @@
 
         <!-- Password -->
         <div>
-            <x-input 
+            <x-password 
                 label="{{ __('New Password') }}"
                 placeholder="Enter your new password"
                 name="password"
-                type="password"
                 required
                 autocomplete="new-password"
             />
@@ -38,11 +37,10 @@
 
         <!-- Confirm Password -->
         <div>
-            <x-input 
+            <x-password 
                 label="{{ __('Confirm Password') }}"
                 placeholder="Confirm your new password"
                 name="password_confirmation"
-                type="password"
                 required
                 autocomplete="new-password"
             />
@@ -54,10 +52,8 @@
             class="w-full" 
             primary 
             xl
+            icon="key"
         >
-            <x-slot name="prepend">
-                <x-icon name="key" class="w-5 h-5" />
-            </x-slot>
             {{ __('Update Password') }}
         </x-button>
 

@@ -2,9 +2,19 @@
     <!-- Page Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <!-- Page Header -->
-        @section('title', 'Create New User')
-        @section('page-title', 'Create New User')
-        @section('page-description', 'Add a new user to the system')
+        @section('title', 'User Management')
+        @section('page-title', 'User Management')
+        @section('page-description', 'Manage system users, roles, and permissions')
+        @section('breadcrumb')
+            <li>
+                <div class="flex items-center">
+                    <svg class="w-3 h-3 text-gray-400 mx-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+                    </svg>
+                    <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2 dark:text-gray-400">Users</span>
+                </div>
+            </li>
+        @endsection
         
         <div class="flex items-end gap-3">
             @can('users.create')
@@ -192,11 +202,11 @@
                         <!-- Status -->
                         <th class="px-6 py-3 text-left">
                             <button 
-                                wire:click="sortBy('status')"
+                                wire:click="sortBy('is_active')"
                                 class="group flex items-center space-x-1 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hover:text-gray-700 dark:hover:text-gray-300"
                             >
                                 <span>Status</span>
-                                @if($sortField === 'status')
+                                @if($sortField === 'is_active')
                                     @if($sortDirection === 'asc')
                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
@@ -320,7 +330,7 @@
 
                             <!-- Status -->
                             <td class="px-6 py-4 whitespace-nowrap">
-                                @if($user->status === 'active')
+                                @if($user->is_active)
                                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100">
                                         <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
@@ -353,22 +363,21 @@
                                     @endcan
 
                                     @can('users.update')
-                                        <x-mini-button icon="pencil" 
+                                        <x-mini-button primary icon="pencil" 
                                                         href="{{ route('admin.users.edit', $user) }}"
                                                         label="" />
                                         
                                         @if($user->id !== auth()->id())
-                                            <x-mini-button 
-                                                            class="{{ $user->status === 'active' ? 'text-orange-600 hover:text-orange-800 dark:text-orange-400' : 'text-green-600 hover:text-green-800 dark:text-green-400' }}"
+                                            <x-mini-button {{ $user->is_active ? 'amber' : 'positive' }}
                                                             wire:click="toggleUserStatus({{ $user->id }})"
-                                                            icon="{{ $user->status === 'active' ? 'pause' : 'play' }}"
-                                                            label="{{ $user->status === 'active' ? 'Deactivate' : 'Activate' }} User" />
+                                                            icon="{{ $user->is_active ? 'pause' : 'play' }}"
+                                                            label="{{ $user->is_active ? 'Deactivate' : 'Activate' }} User" />
                                         @endif
                                     @endcan
 
                                     @can('users.delete')
                                         @if($user->id !== auth()->id() && (!$user->hasRole('Super Admin') || auth()->user()->hasRole('Super Admin')))
-                                            <x-mini-button red icon="trash"
+                                            <x-mini-button negative icon="trash"
                                                             x-on:confirm="{
                                                                 title: 'Delete User',
                                                                 description: 'Are you sure you want to delete {{ $user->name }}? This action cannot be undone.',

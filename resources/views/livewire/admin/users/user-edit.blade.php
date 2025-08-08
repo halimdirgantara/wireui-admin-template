@@ -101,21 +101,24 @@
                     </div>
 
                     <!-- Status -->
-                    <div>
-                        <x-select
-                            wire:model="status"
-                            label="Status"
-                            placeholder="Select status"
-                            required
+                    <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div class="flex-1">
+                            <label class="text-sm font-medium text-gray-900 dark:text-gray-100">User Status</label>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">
+                                {{ $is_active ? 'Active' : 'Inactive' }} - {{ $is_active ? 'User can access the system' : 'User cannot access the system' }}
+                            </p>
+                            @if($user->id === auth()->id() && !auth()->user()->hasRole('Super Admin'))
+                                <p class="text-xs text-orange-600 dark:text-orange-400 mt-1">You cannot change your own status</p>
+                            @endif
+                        </div>
+                        <x-toggle 
+                            wire:model="is_active" 
+                            id="is_active" 
+                            name="is_active" 
+                            positive 
+                            xl
                             :disabled="$user->id === auth()->id() && !auth()->user()->hasRole('Super Admin')"
-                        >
-                            <x-select.option label="Active" value="active" />
-                            <x-select.option label="Inactive" value="inactive" />
-                        </x-select>
-                        
-                        @if($user->id === auth()->id() && !auth()->user()->hasRole('Super Admin'))
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">You cannot change your own status</p>
-                        @endif
+                        />
                     </div>
 
                     <!-- Account Info -->

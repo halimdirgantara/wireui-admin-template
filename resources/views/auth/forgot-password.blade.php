@@ -38,10 +38,8 @@
             class="w-full" 
             primary 
             xl
+            icon="envelope"
         >
-            <x-slot name="prepend">
-                <x-icon name="mail" class="w-5 h-5" />
-            </x-slot>
             {{ __('Send Reset Link') }}
         </x-button>
 

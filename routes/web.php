@@ -7,10 +7,10 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// // Redirect authenticated users to admin dashboard
-// Route::get('/dashboard', function () {
-//     return redirect()->route('admin.dashboard');
-// })->middleware(['auth', 'verified'])->name('dashboard');
+// Redirect authenticated users to admin dashboard
+Route::get('/dashboard', function () {
+    return redirect()->route('admin.dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
 
 // // Redirect /home to admin dashboard for backward compatibility
 // Route::get('/home', function () {

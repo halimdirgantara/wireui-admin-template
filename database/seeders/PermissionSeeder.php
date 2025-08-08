@@ -28,7 +28,7 @@ class PermissionSeeder extends Seeder
             // User management permissions
             'users.view',
             'users.create',
-            'users.edit',
+            'users.update',
             'users.delete',
             'users.restore',
             'users.force-delete',
@@ -38,14 +38,14 @@ class PermissionSeeder extends Seeder
             // Role management permissions
             'roles.view',
             'roles.create',
-            'roles.edit',
+            'roles.update',
             'roles.delete',
             'roles.assign',
             
             // Permission management
             'permissions.view',
             'permissions.create',
-            'permissions.edit',
+            'permissions.update',
             'permissions.delete',
             
             // Activity log permissions
@@ -55,12 +55,12 @@ class PermissionSeeder extends Seeder
             
             // System settings
             'settings.view',
-            'settings.edit',
+            'settings.update',
             'settings.system',
             
             // Profile management
             'profile.view',
-            'profile.edit',
+            'profile.update',
             'profile.change-password',
             
             // Reports and analytics
@@ -86,19 +86,19 @@ class PermissionSeeder extends Seeder
             'dashboard.analytics',
             'users.view',
             'users.create',
-            'users.edit',
+            'users.update',
             'users.delete',
             'users.export',
             'users.import',
             'roles.view',
             'roles.create',
-            'roles.edit',
+            'roles.update',
             'roles.assign',
             'permissions.view',
             'activity-logs.view',
             'activity-logs.export',
             'profile.view',
-            'profile.edit',
+            'profile.update',
             'profile.change-password',
             'reports.view',
             'reports.create',
@@ -110,11 +110,11 @@ class PermissionSeeder extends Seeder
         $editor->givePermissionTo([
             'dashboard.view',
             'users.view',
-            'users.edit',
+            'users.update',
             'users.export',
             'activity-logs.view',
             'profile.view',
-            'profile.edit',
+            'profile.update',
             'profile.change-password',
             'reports.view',
             'reports.create',
@@ -129,7 +129,7 @@ class PermissionSeeder extends Seeder
             'permissions.view',
             'activity-logs.view',
             'profile.view',
-            'profile.edit',
+            'profile.update',
             'profile.change-password',
             'reports.view',
         ]);
@@ -140,7 +140,7 @@ class PermissionSeeder extends Seeder
             'email' => 'admin@wireui-admin.local',
             'password' => Hash::make('password'),
             'email_verified_at' => now(),
-            'status' => true,
+            'is_active' => true,
         ]);
 
         $superAdminUser->assignRole($superAdmin);

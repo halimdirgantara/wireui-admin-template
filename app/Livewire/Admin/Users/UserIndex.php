@@ -150,10 +150,10 @@ class UserIndex extends Component
             return;
         }
 
-        $user->status = $user->status === 'active' ? 'inactive' : 'active';
+        $user->is_active = !$user->is_active;
         $user->save();
 
-        $status = $user->status === 'active' ? 'activated' : 'deactivated';
+        $status = $user->is_active ? 'activated' : 'deactivated';
         activity()
             ->causedBy(auth()->user())
             ->performedOn($user)
@@ -243,7 +243,7 @@ class UserIndex extends Component
 
         $count = User::whereIn('id', $this->selectedUsers)
                     ->where('id', '!=', auth()->id()) // Don't update self
-                    ->update(['status' => 'active']);
+                    ->update(['is_active' => true]);
 
         if ($count > 0) {
             activity()
@@ -272,7 +272,7 @@ class UserIndex extends Component
 
         $count = User::whereIn('id', $this->selectedUsers)
                     ->where('id', '!=', auth()->id()) // Don't update self
-                    ->update(['status' => 'inactive']);
+                    ->update(['is_active' => false]);
 
         if ($count > 0) {
             activity()
@@ -297,7 +297,11 @@ class UserIndex extends Component
                 });
             })
             ->when($this->statusFilter !== 'all', function ($query) {
-                $query->where('status', $this->statusFilter);
+                if ($this->statusFilter === 'active') {
+                    $query->where('is_active', true);
+                } else if ($this->statusFilter === 'inactive') {
+                    $query->where('is_active', false);
+                }
             })
             ->when($this->roleFilter !== 'all', function ($query) {
                 $query->whereHas('roles', function ($q) {

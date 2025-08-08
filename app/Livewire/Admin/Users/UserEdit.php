@@ -19,7 +19,7 @@ class UserEdit extends Component
     public $email = '';
     public $password = '';
     public $password_confirmation = '';
-    public $status = 'active';
+    public $is_active = true;
     public $selectedRoles = [];
     public $avatar = '';
 
@@ -33,7 +33,7 @@ class UserEdit extends Component
         $this->user = $user;
         $this->name = $user->name;
         $this->email = $user->email;
-        $this->status = $user->status ?? 'active';
+        $this->is_active = $user->is_active ?? true;
         $this->avatar = $user->avatar ?? '';
         $this->selectedRoles = $user->roles->pluck('id')->toArray();
     }
@@ -44,7 +44,7 @@ class UserEdit extends Component
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $this->user->id,
             'password' => ['nullable', 'confirmed', Password::defaults()],
-            'status' => 'required|in:active,inactive',
+            'is_active' => 'required|boolean',
             'selectedRoles' => 'array',
             'selectedRoles.*' => 'exists:roles,id',
             'avatar' => 'nullable|url|max:255',
@@ -68,7 +68,7 @@ class UserEdit extends Component
 
         // Prevent editing self status or roles if not Super Admin
         if ($this->user->id === auth()->id()) {
-            if ($this->status !== $this->user->status && !auth()->user()->hasRole('Super Admin')) {
+            if ($this->is_active !== $this->user->is_active && !auth()->user()->hasRole('Super Admin')) {
                 $this->notification()->error('Error', 'You cannot change your own status.');
                 return;
             }
@@ -90,7 +90,7 @@ class UserEdit extends Component
             $updateData = [
                 'name' => $this->name,
                 'email' => $this->email,
-                'status' => $this->status,
+                'is_active' => $this->is_active,
                 'avatar' => $this->avatar ?: null,
             ];
 

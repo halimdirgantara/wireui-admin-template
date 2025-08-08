@@ -22,10 +22,8 @@
                 class="w-full" 
                 primary 
                 xl
+                icon="envelope"
             >
-                <x-slot name="prepend">
-                    <x-icon name="mail" class="w-5 h-5" />
-                </x-slot>
                 {{ __('Resend Verification Email') }}
             </x-button>
         </form>
@@ -38,10 +36,8 @@
                     class="w-full" 
                     secondary 
                     outline
+                    icon="arrow-right-on-rectangle"
                 >
-                    <x-slot name="prepend">
-                        <x-icon name="logout" class="w-5 h-5" />
-                    </x-slot>
                     {{ __('Log Out') }}
                 </x-button>
             </form>

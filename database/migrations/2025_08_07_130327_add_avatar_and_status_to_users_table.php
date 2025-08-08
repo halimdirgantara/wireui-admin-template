@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->string('avatar')->nullable()->after('email_verified_at');
-            $table->boolean('status')->default(true)->after('avatar');
+            $table->boolean('is_active')->default(true)->after('avatar');
         });
     }
 
@@ -23,7 +23,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn(['avatar', 'status']);
+            $table->dropColumn(['avatar', 'is_active']);
         });
     }
 };

@@ -18,7 +18,7 @@ class UserCreate extends Component
     public $email = '';
     public $password = '';
     public $password_confirmation = '';
-    public $status = 'active';
+    public $is_active = true;
     public $selectedRoles = [];
     public $avatar = '';
 
@@ -36,7 +36,7 @@ class UserCreate extends Component
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => ['required', 'confirmed', Password::defaults()],
-            'status' => 'required|boolean',
+            'is_active' => 'required|boolean',
             'selectedRoles' => 'array',
             'selectedRoles.*' => 'exists:roles,id',
             'avatar' => 'nullable|url|max:255',
@@ -64,7 +64,7 @@ class UserCreate extends Component
                 'name' => $this->name,
                 'email' => $this->email,
                 'password' => Hash::make($this->password),
-                'status' => $this->status,
+                'is_active' => $this->is_active,
                 'avatar' => $this->avatar ?: null,
                 'email_verified_at' => now(), // Auto-verify created users
             ]);
