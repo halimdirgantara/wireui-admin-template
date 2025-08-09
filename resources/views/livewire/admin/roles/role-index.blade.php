@@ -116,7 +116,7 @@
                         <th class="px-6 py-3 text-left">
                             <button 
                                 wire:click="sortBy('name')"
-                                class="group flex items-center space-x-1 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hover:text-gray-700 dark:hover:text-gray-300"
+                                class="group flex items-center space-x-1 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hover:text-gray-700 dark:hover:text-gray-300 cursor-pointer"
                             >
                                 <span>Role Name</span>
                                 @if($sortField === 'name')
@@ -151,7 +151,7 @@
                         <th class="px-6 py-3 text-left">
                             <button 
                                 wire:click="sortBy('created_at')"
-                                class="group flex items-center space-x-1 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hover:text-gray-700 dark:hover:text-gray-300"
+                                class="group flex items-center space-x-1 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hover:text-gray-700 dark:hover:text-gray-300 cursor-pointer"
                             >
                                 <span>Created</span>
                                 @if($sortField === 'created_at')
