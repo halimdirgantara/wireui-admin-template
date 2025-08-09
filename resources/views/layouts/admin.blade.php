@@ -217,5 +217,7 @@
             localStorage.setItem('darkMode', window.matchMedia('(prefers-color-scheme: dark)').matches);
         }
     </script>
+    
+    @stack('scripts')
 </body>
 </html>
