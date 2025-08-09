@@ -12,29 +12,21 @@ use Spatie\Permission\Models\Permission;
 
 class Dashboard extends Component
 {
+    public $showCharts = true;
+    public $refreshInterval = 30000; // 30 seconds in milliseconds
+    
     #[Layout('layouts.admin')]
     public function render()
     {
-        // User Statistics
-        $totalUsers = User::count();
-        $activeUsers = User::where('status', 'active')->count();
-        $inactiveUsers = User::where('status', 'inactive')->count();
-        $verifiedUsers = User::whereNotNull('email_verified_at')->count();
+        // Quick stats for legacy support and overview
+        $quickStats = [
+            'total_users' => User::count(),
+            'active_users' => User::where('is_active', true)->count(),
+            'total_roles' => Role::count(),
+            'today_activities' => Activity::whereDate('created_at', Carbon::today())->count(),
+        ];
         
-        // Recent user growth (last 7 days)
-        $weeklyUserGrowth = User::where('created_at', '>=', Carbon::now()->subWeek())->count();
-        $monthlyUserGrowth = User::where('created_at', '>=', Carbon::now()->subMonth())->count();
-        
-        // System Statistics
-        $totalRoles = Role::count();
-        $totalPermissions = Permission::count();
-        
-        // Activity Statistics
-        $totalActivities = Activity::count();
-        $todayActivities = Activity::whereDate('created_at', Carbon::today())->count();
-        $weeklyActivities = Activity::where('created_at', '>=', Carbon::now()->subWeek())->count();
-        
-        // Role Distribution
+        // Role Distribution for existing view compatibility
         $roleDistribution = Role::withCount('users')
             ->orderBy('users_count', 'desc')
             ->get()
@@ -63,27 +55,22 @@ class Dashboard extends Component
                 ];
             });
 
-        // Calculate growth percentages
-        $userGrowthPercentage = $totalUsers > 0 ? round(($weeklyUserGrowth / $totalUsers) * 100, 1) : 0;
-        $activityGrowthPercentage = $totalActivities > 0 ? round(($weeklyActivities / $totalActivities) * 100, 1) : 0;
-
         return view('livewire.admin.dashboard', compact(
-            'totalUsers',
-            'activeUsers', 
-            'inactiveUsers',
-            'verifiedUsers',
-            'weeklyUserGrowth',
-            'monthlyUserGrowth',
-            'userGrowthPercentage',
-            'totalRoles',
-            'totalPermissions',
-            'totalActivities',
-            'todayActivities',
-            'weeklyActivities',
-            'activityGrowthPercentage',
+            'quickStats',
             'roleDistribution',
             'recentActivities'
         ));
+    }
+
+    public function toggleCharts()
+    {
+        $this->showCharts = !$this->showCharts;
+    }
+    
+    public function refreshDashboard()
+    {
+        // This will trigger a re-render of all components
+        $this->dispatch('dashboard-refreshed');
     }
 
     private function getRoleColor($roleName)

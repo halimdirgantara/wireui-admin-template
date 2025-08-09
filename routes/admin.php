@@ -10,26 +10,74 @@ use App\Http\Controllers\Admin\DashboardController;
 |
 | Here is where you can register admin routes for your application.
 | These routes are loaded by the RouteServiceProvider and are protected
-| by authentication middleware.
+| by authentication middleware with rate limiting and permission checks.
 |
 */
 
-Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(function () {
-    
-    // Dashboard
-    // Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/dashboard', \App\Livewire\Admin\Dashboard::class)->name('dashboard');
-    
-    // Users Management
-    Route::get('/users', \App\Livewire\Admin\Users\UserIndex::class)->name('users.index')->middleware('can:users.view');
-    Route::get('/users/create', \App\Livewire\Admin\Users\UserCreate::class)->name('users.create')->middleware('can:users.create');
-    Route::get('/users/{user}', \App\Livewire\Admin\Users\UserShow::class)->name('users.show')->middleware('can:users.view');
-    Route::get('/users/{user}/edit', \App\Livewire\Admin\Users\UserEdit::class)->name('users.edit')->middleware('can:users.update');
-    
-    // Roles & Permissions (will be implemented in later phases)  
-    // Route::resource('roles', RoleController::class);
-    
-    // Activity Logs (will be implemented in later phases)
-    // Route::get('activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
-    
-});
+// Admin route group with comprehensive middleware
+Route::prefix('admin')
+    ->name('admin.')
+    ->middleware([
+        'auth', 
+        'verified', 
+        'throttle:admin', // Custom admin rate limiting
+        'admin.access'    // Custom admin access middleware
+    ])
+    ->group(function () {
+        
+        // Dashboard - Available to all authenticated admin users
+        Route::get('/', \App\Livewire\Admin\Dashboard::class)->name('dashboard');
+        Route::get('/dashboard', \App\Livewire\Admin\Dashboard::class)->name('dashboard.alt');
+        
+        // Global Search - Available to all authenticated admin users
+        Route::get('/search', \App\Livewire\Admin\SearchResults::class)->name('search');
+        
+        // Users Management - Permission-based access
+        Route::prefix('users')->name('users.')->group(function () {
+            Route::get('/', \App\Livewire\Admin\Users\UserIndex::class)
+                ->name('index')
+                ->middleware('can:users.view');
+                
+            Route::get('/create', \App\Livewire\Admin\Users\UserCreate::class)
+                ->name('create')
+                ->middleware('can:users.create');
+                
+            Route::get('/{user}', \App\Livewire\Admin\Users\UserShow::class)
+                ->name('show')
+                ->middleware('can:users.view')
+                ->where('user', '[0-9]+'); // Route constraint for numeric IDs
+                
+            Route::get('/{user}/edit', \App\Livewire\Admin\Users\UserEdit::class)
+                ->name('edit')
+                ->middleware('can:users.update')
+                ->where('user', '[0-9]+');
+        });
+        
+        // Roles & Permissions Management - High-level permissions required
+        Route::prefix('roles')->name('roles.')->middleware('can:roles.view')->group(function () {
+            Route::get('/', \App\Livewire\Admin\Roles\RoleIndex::class)->name('index');
+        });
+        
+        // System Settings - Super admin only
+        Route::prefix('settings')->name('settings.')->middleware('role:Super Admin')->group(function () {
+            // Route::get('/', [SettingsController::class, 'index'])->name('index');
+            // Route::post('/update', [SettingsController::class, 'update'])->name('update');
+        });
+        
+        // Activity Logs - Audit trail access
+        Route::prefix('activity-logs')->name('activity-logs.')->middleware('can:activity-logs.view')->group(function () {
+            Route::get('/', \App\Livewire\Admin\ActivityLogs\ActivityLogIndex::class)->name('index');
+        });
+        
+        // API Management - For future API endpoint management
+        Route::prefix('api-management')->name('api.')->middleware('role:Super Admin|Admin')->group(function () {
+            // Route::get('/tokens', [ApiTokenController::class, 'index'])->name('tokens.index');
+            // Route::post('/tokens', [ApiTokenController::class, 'store'])->name('tokens.store');
+        });
+        
+        // System Health & Monitoring - Admin and above
+        Route::prefix('system')->name('system.')->middleware('role:Super Admin|Admin')->group(function () {
+            // Route::get('/health', [SystemController::class, 'health'])->name('health');
+            // Route::get('/logs', [SystemController::class, 'logs'])->name('logs');
+        });
+    });

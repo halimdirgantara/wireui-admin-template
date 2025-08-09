@@ -16,5 +16,8 @@
         "pusher-js": "^8.4.0",
         "tailwindcss": "^4.1.11",
         "vite": "^6.2.4"
+    },
+    "dependencies": {
+        "chart.js": "^4.5.0"
     }
 }

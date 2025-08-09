@@ -7,6 +7,10 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/test-charts', function () {
+    return view('test-charts');
+});
+
 // Redirect authenticated users to admin dashboard
 Route::get('/dashboard', function () {
     return redirect()->route('admin.dashboard');
