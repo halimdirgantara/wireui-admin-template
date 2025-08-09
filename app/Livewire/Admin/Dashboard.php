@@ -17,8 +17,8 @@ class Dashboard extends Component
     {
         // User Statistics
         $totalUsers = User::count();
-        $activeUsers = User::where('status', 'active')->count();
-        $inactiveUsers = User::where('status', 'inactive')->count();
+        $activeUsers = User::where('is_active', true)->count();
+        $inactiveUsers = User::where('is_active', false)->count();
         $verifiedUsers = User::whereNotNull('email_verified_at')->count();
         
         // Recent user growth (last 7 days)
