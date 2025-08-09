@@ -53,6 +53,49 @@ class PermissionSeeder extends Seeder
             'activity-logs.delete',
             'activity-logs.export',
             
+            // Blog Posts permissions
+            'posts.view',
+            'posts.view-all',
+            'posts.view-own',
+            'posts.create',
+            'posts.update',
+            'posts.update-all',
+            'posts.update-own',
+            'posts.delete',
+            'posts.delete-all',
+            'posts.delete-own',
+            'posts.publish',
+            'posts.unpublish',
+            'posts.schedule',
+            'posts.feature',
+            'posts.export',
+            'posts.import',
+            
+            // Blog Categories permissions
+            'categories.view',
+            'categories.create',
+            'categories.update',
+            'categories.delete',
+            'categories.reorder',
+            
+            // Blog Tags permissions
+            'tags.view',
+            'tags.create',
+            'tags.update',
+            'tags.delete',
+            'tags.merge',
+            
+            // Blog Analytics permissions
+            'blog-analytics.view',
+            'blog-analytics.advanced',
+            'blog-analytics.export',
+            
+            // Blog SEO permissions
+            'blog-seo.manage',
+            'blog-seo.meta-tags',
+            'blog-seo.sitemap',
+            'blog-seo.redirects',
+            
             // System settings
             'settings.view',
             'settings.update',
@@ -70,18 +113,18 @@ class PermissionSeeder extends Seeder
         ];
 
         foreach ($permissions as $permission) {
-            Permission::create(['name' => $permission]);
+            Permission::firstOrCreate(['name' => $permission]);
         }
 
         // Create roles and assign permissions
         
         // Super Admin - All permissions
-        $superAdmin = Role::create(['name' => 'Super Admin']);
-        $superAdmin->givePermissionTo(Permission::all());
+        $superAdmin = Role::firstOrCreate(['name' => 'Super Admin']);
+        $superAdmin->syncPermissions(Permission::all());
 
         // Admin - Most permissions except system settings
-        $admin = Role::create(['name' => 'Admin']);
-        $admin->givePermissionTo([
+        $admin = Role::firstOrCreate(['name' => 'Admin']);
+        $admin->syncPermissions([
             'dashboard.view',
             'dashboard.analytics',
             'users.view',
@@ -97,6 +140,37 @@ class PermissionSeeder extends Seeder
             'permissions.view',
             'activity-logs.view',
             'activity-logs.export',
+            // Blog permissions for Admin
+            'posts.view',
+            'posts.view-all',
+            'posts.create',
+            'posts.update',
+            'posts.update-all',
+            'posts.delete',
+            'posts.delete-all',
+            'posts.publish',
+            'posts.unpublish',
+            'posts.schedule',
+            'posts.feature',
+            'posts.export',
+            'posts.import',
+            'categories.view',
+            'categories.create',
+            'categories.update',
+            'categories.delete',
+            'categories.reorder',
+            'tags.view',
+            'tags.create',
+            'tags.update',
+            'tags.delete',
+            'tags.merge',
+            'blog-analytics.view',
+            'blog-analytics.advanced',
+            'blog-analytics.export',
+            'blog-seo.manage',
+            'blog-seo.meta-tags',
+            'blog-seo.sitemap',
+            'blog-seo.redirects',
             'profile.view',
             'profile.update',
             'profile.change-password',
@@ -106,13 +180,30 @@ class PermissionSeeder extends Seeder
         ]);
 
         // Editor - Content management focused
-        $editor = Role::create(['name' => 'Editor']);
-        $editor->givePermissionTo([
+        $editor = Role::firstOrCreate(['name' => 'Editor']);
+        $editor->syncPermissions([
             'dashboard.view',
             'users.view',
             'users.update',
             'users.export',
             'activity-logs.view',
+            // Blog permissions for Editor
+            'posts.view',
+            'posts.view-own',
+            'posts.create',
+            'posts.update-own',
+            'posts.delete-own',
+            'posts.publish',
+            'posts.schedule',
+            'posts.export',
+            'categories.view',
+            'categories.create',
+            'categories.update',
+            'tags.view',
+            'tags.create',
+            'tags.update',
+            'blog-analytics.view',
+            'blog-seo.meta-tags',
             'profile.view',
             'profile.update',
             'profile.change-password',
@@ -120,14 +211,41 @@ class PermissionSeeder extends Seeder
             'reports.create',
         ]);
 
+        // Blog Author - Focused on content creation
+        $blogAuthor = Role::firstOrCreate(['name' => 'Blog Author']);
+        $blogAuthor->syncPermissions([
+            'dashboard.view',
+            // Blog permissions for Author (own content only)
+            'posts.view',
+            'posts.view-own',
+            'posts.create',
+            'posts.update-own',
+            'posts.delete-own',
+            'posts.schedule',
+            'categories.view',
+            'tags.view',
+            'tags.create',
+            'blog-analytics.view',
+            'blog-seo.meta-tags',
+            'profile.view',
+            'profile.update',
+            'profile.change-password',
+        ]);
+
         // Viewer - Read-only access
-        $viewer = Role::create(['name' => 'Viewer']);
-        $viewer->givePermissionTo([
+        $viewer = Role::firstOrCreate(['name' => 'Viewer']);
+        $viewer->syncPermissions([
             'dashboard.view',
             'users.view',
             'roles.view',
             'permissions.view',
             'activity-logs.view',
+            // Blog permissions for Viewer (read-only)
+            'posts.view',
+            'posts.view-own',
+            'categories.view',
+            'tags.view',
+            'blog-analytics.view',
             'profile.view',
             'profile.update',
             'profile.change-password',
@@ -135,13 +253,15 @@ class PermissionSeeder extends Seeder
         ]);
 
         // Create default Super Admin user
-        $superAdminUser = User::create([
-            'name' => 'Super Admin',
-            'email' => 'admin@wireui-admin.local',
-            'password' => Hash::make('password'),
-            'email_verified_at' => now(),
-            'is_active' => true,
-        ]);
+        $superAdminUser = User::firstOrCreate(
+            ['email' => 'admin@wireui-admin.local'],
+            [
+                'name' => 'Super Admin',
+                'password' => Hash::make('password'),
+                'email_verified_at' => now(),
+                'is_active' => true,
+            ]
+        );
 
         $superAdminUser->assignRole($superAdmin);
 
