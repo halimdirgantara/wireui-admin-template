@@ -177,14 +177,14 @@
                     </div>
                 </div>
 
+                <!-- Global Search -->
+                <div class="flex-1 max-w-md mx-8">
+                    <livewire:admin.components.global-search />
+                </div>
+
                 <div class="flex items-center space-x-4">
                     <!-- Notifications -->
-                    <button class="p-2 rounded-lg flat-button relative cursor-pointer">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5v-5zM15 17H9a4 4 0 01-4-4V5a2 2 0 012-2h6a2 2 0 012 2v8.5"></path>
-                        </svg>
-                        <span class="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full"></span>
-                    </button>
+                    <livewire:admin.components.notification-center />
 
                     <!-- Dark Mode Toggle -->
                     <button @click="toggleDarkMode()" 

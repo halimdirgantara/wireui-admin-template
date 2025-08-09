@@ -29,6 +29,9 @@ Route::prefix('admin')
         Route::get('/', \App\Livewire\Admin\Dashboard::class)->name('dashboard');
         Route::get('/dashboard', \App\Livewire\Admin\Dashboard::class)->name('dashboard.alt');
         
+        // Global Search - Available to all authenticated admin users
+        Route::get('/search', \App\Livewire\Admin\SearchResults::class)->name('search');
+        
         // Users Management - Permission-based access
         Route::prefix('users')->name('users.')->group(function () {
             Route::get('/', \App\Livewire\Admin\Users\UserIndex::class)
@@ -63,8 +66,7 @@ Route::prefix('admin')
         
         // Activity Logs - Audit trail access
         Route::prefix('activity-logs')->name('activity-logs.')->middleware('can:activity-logs.view')->group(function () {
-            // Route::get('/', [ActivityLogController::class, 'index'])->name('index');
-            // Route::get('/{activity}', [ActivityLogController::class, 'show'])->name('show');
+            Route::get('/', \App\Livewire\Admin\ActivityLogs\ActivityLogIndex::class)->name('index');
         });
         
         // API Management - For future API endpoint management
