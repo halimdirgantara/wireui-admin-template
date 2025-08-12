@@ -15,6 +15,7 @@
         "livewire/livewire": "^3.6",
         "spatie/laravel-activitylog": "^4.10",
         "spatie/laravel-permission": "^6.21",
+        "ueberdosis/tiptap-php": "^2.0",
         "wireui/wireui": "^2.4"
     },
     "require-dev": {

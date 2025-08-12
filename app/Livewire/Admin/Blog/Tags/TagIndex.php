@@ -6,12 +6,12 @@ use App\Models\Tag;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Component;
 use Livewire\WithPagination;
-use WireUi\Traits\Actions;
+use WireUi\Traits\WireUiActions;
 use Illuminate\Support\Str;
 
 class TagIndex extends Component
 {
-    use WithPagination, Actions, AuthorizesRequests;
+    use WithPagination, WireUiActions, AuthorizesRequests;
 
     public $search = '';
     public $showInactive = false;

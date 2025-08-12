@@ -8,12 +8,12 @@ use App\Models\User;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Component;
 use Livewire\WithPagination;
-use WireUi\Traits\Actions;
+use WireUi\Traits\WireUiActions;
 use Carbon\Carbon;
 
 class PostIndex extends Component
 {
-    use WithPagination, Actions, AuthorizesRequests;
+    use WithPagination, WireUiActions, AuthorizesRequests;
 
     public $search = '';
     public $statusFilter = '';
@@ -255,7 +255,7 @@ class PostIndex extends Component
             "Post '{$originalPost->title}' has been duplicated."
         );
 
-        return redirect()->route('admin.posts.edit', $newPost);
+        return redirect()->route('admin.blog.posts.edit', $newPost);
     }
 
     public function deletePost($postId)

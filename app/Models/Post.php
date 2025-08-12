@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\TipTapContentProcessor;
 use App\Traits\AdvancedSearchable;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -12,12 +13,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
-use Spatie\Activitylog\LogsActivity;
-use Spatie\Activitylog\Traits\LogsActivity as LogsActivityTrait;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
-class Post extends Model implements LogsActivity
+class Post extends Model
 {
-    use HasFactory, AdvancedSearchable, LogsActivityTrait;
+    use HasFactory, AdvancedSearchable, LogsActivity;
 
     const STATUS_DRAFT = 'draft';
     const STATUS_PUBLISHED = 'published';
@@ -55,48 +56,52 @@ class Post extends Model implements LogsActivity
         'reading_time' => 'integer'
     ];
 
-    protected $searchableColumns = [
-        'title',
-        'slug',
-        'excerpt',
-        'content',
-        'seo_title',
-        'seo_description',
-        'meta_keywords',
-        'user.name',
-        'category.name'
-    ];
-
-    protected $dateColumns = [
-        'created_at',
-        'updated_at',
-        'published_at'
-    ];
-
-    protected static $logAttributes = [
-        'title',
-        'slug',
-        'status',
-        'published_at',
-        'is_featured',
-        'category_id'
-    ];
-
-    protected static $logName = 'post';
-
-    protected static $logOnlyDirty = true;
-
-    protected static $submitEmptyLogs = false;
-
-    public function getDescriptionForEvent(string $eventName): string
+    public function __construct(array $attributes = [])
     {
-        return "Post '{$this->title}' was {$eventName}";
+        parent::__construct($attributes);
+        
+        // Configure searchable columns
+        $this->searchableColumns = [
+            'title',
+            'slug',
+            'excerpt',
+            'content',
+            'seo_title',
+            'seo_description',
+            'meta_keywords',
+            'user.name',
+            'category.name'
+        ];
+        
+        // Configure date columns for filtering
+        $this->dateColumns = [
+            'created_at',
+            'updated_at',
+            'published_at'
+        ];
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['title', 'slug', 'status', 'published_at', 'is_featured', 'category_id'])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->useLogName('post')
+            ->setDescriptionForEvent(fn(string $eventName) => "Post '{$this->title}' was {$eventName}");
     }
 
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
+
+
+    public function author(): BelongsTo
+    {
+        return $this->belongsTo(User::class, "user_id","id");
+    }
+
 
     public function category(): BelongsTo
     {
@@ -248,8 +253,7 @@ class Post extends Model implements LogsActivity
             return $value;
         }
 
-        $wordCount = str_word_count(strip_tags($this->content));
-        return max(1, round($wordCount / 200));
+        return TipTapContentProcessor::calculateReadingTime($this->content);
     }
 
     public function getExcerptAttribute($value): string
@@ -258,7 +262,27 @@ class Post extends Model implements LogsActivity
             return $value;
         }
 
-        return Str::limit(strip_tags($this->content), 160);
+        return TipTapContentProcessor::generateExcerpt($this->content, 160);
+    }
+
+    public function getContentWithAnchorsAttribute(): string
+    {
+        return TipTapContentProcessor::addHeadingAnchors($this->content);
+    }
+
+    public function getTableOfContentsAttribute(): array
+    {
+        return TipTapContentProcessor::extractHeadings($this->content);
+    }
+
+    public function getContentImagesAttribute(): array
+    {
+        return TipTapContentProcessor::extractImages($this->content);
+    }
+
+    public function getSanitizedContentAttribute(): string
+    {
+        return TipTapContentProcessor::sanitizeContent($this->content);
     }
 
     public function getSeoTitleAttribute($value): string
@@ -273,7 +297,7 @@ class Post extends Model implements LogsActivity
 
     public function getUrlAttribute(): string
     {
-        return route('blog.show', $this->slug);
+        return route('admin.blog.posts.show', $this->slug);
     }
 
     public function getTagNamesAttribute(): string
@@ -319,7 +343,7 @@ class Post extends Model implements LogsActivity
                     ->get();
     }
 
-    public function incrementViews(string $ipAddress = null, string $userAgent = null, string $referrer = null, int $userId = null): void
+    public function incrementViews(?string $ipAddress = null, ?string $userAgent = null, ?string $referrer = null, ?int $userId = null): void
     {
         $this->increment('views_count');
 
@@ -410,7 +434,18 @@ class Post extends Model implements LogsActivity
                 $post->user_id = auth()->id();
             }
 
-            $post->reading_time = $post->reading_time;
+            // Process content with TipTap
+            if ($post->content) {
+                $post->content = TipTapContentProcessor::sanitizeContent($post->content);
+                $post->reading_time = TipTapContentProcessor::calculateReadingTime($post->content);
+                
+                // Auto-generate excerpt if empty
+                if (empty($post->excerpt)) {
+                    $post->excerpt = TipTapContentProcessor::generateExcerpt($post->content, 160);
+                }
+            } else {
+                $post->reading_time = 1;
+            }
         });
 
         static::updating(function (Post $post) {
@@ -419,7 +454,16 @@ class Post extends Model implements LogsActivity
             }
             
             if ($post->isDirty('content')) {
-                $post->reading_time = $post->reading_time;
+                // Sanitize content
+                $post->content = TipTapContentProcessor::sanitizeContent($post->content);
+                
+                // Update reading time
+                $post->reading_time = TipTapContentProcessor::calculateReadingTime($post->content);
+                
+                // Auto-generate excerpt if empty
+                if (empty($post->excerpt)) {
+                    $post->excerpt = TipTapContentProcessor::generateExcerpt($post->content, 160);
+                }
             }
         });
     }

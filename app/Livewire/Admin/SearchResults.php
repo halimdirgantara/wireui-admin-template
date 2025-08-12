@@ -4,6 +4,9 @@ namespace App\Livewire\Admin;
 
 use App\Models\User;
 use App\Models\Activity;
+use App\Models\Post;
+use App\Models\Category;
+use App\Models\Tag;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Url;
@@ -28,6 +31,9 @@ class SearchResults extends Component
         'all' => 'All Results',
         'users' => 'Users',
         'activities' => 'Activities',
+        'posts' => 'Blog Posts',
+        'categories' => 'Categories',
+        'tags' => 'Tags',
     ];
 
     public array $sortOptions = [
@@ -131,6 +137,98 @@ class SearchResults extends Component
             : $query->limit(5)->get();
     }
 
+    public function getPostsProperty()
+    {
+        if ($this->type !== 'all' && $this->type !== 'posts') {
+            return collect([]);
+        }
+
+        if (empty($this->q) || !auth()->user()->can('posts.view')) {
+            return collect([]);
+        }
+
+        $query = Post::multiColumnSearch($this->q)
+            ->with(['user', 'category', 'tags']);
+
+        if ($this->sortBy === 'relevance') {
+            // Custom relevance scoring for posts
+            $query->orderByRaw("
+                CASE 
+                    WHEN title LIKE ? THEN 4
+                    WHEN excerpt LIKE ? THEN 3
+                    WHEN content LIKE ? THEN 2
+                    ELSE 1
+                END DESC
+            ", [$this->q . '%', '%' . $this->q . '%', '%' . $this->q . '%']);
+        } else {
+            $query->orderBy($this->sortBy, $this->sortDirection);
+        }
+
+        return $this->type === 'posts' 
+            ? $query->paginate(10)
+            : $query->limit(5)->get();
+    }
+
+    public function getCategoriesProperty()
+    {
+        if ($this->type !== 'all' && $this->type !== 'categories') {
+            return collect([]);
+        }
+
+        if (empty($this->q) || !auth()->user()->can('categories.view')) {
+            return collect([]);
+        }
+
+        $query = Category::multiColumnSearch($this->q)
+            ->withCount('posts');
+
+        if ($this->sortBy === 'relevance') {
+            $query->orderByRaw("
+                CASE 
+                    WHEN name LIKE ? THEN 3
+                    WHEN description LIKE ? THEN 2
+                    ELSE 1
+                END DESC
+            ", [$this->q . '%', '%' . $this->q . '%']);
+        } else {
+            $query->orderBy($this->sortBy, $this->sortDirection);
+        }
+
+        return $this->type === 'categories' 
+            ? $query->paginate(10)
+            : $query->limit(5)->get();
+    }
+
+    public function getTagsProperty()
+    {
+        if ($this->type !== 'all' && $this->type !== 'tags') {
+            return collect([]);
+        }
+
+        if (empty($this->q) || !auth()->user()->can('tags.view')) {
+            return collect([]);
+        }
+
+        $query = Tag::multiColumnSearch($this->q)
+            ->withPostCounts();
+
+        if ($this->sortBy === 'relevance') {
+            $query->orderByRaw("
+                CASE 
+                    WHEN name LIKE ? THEN 3
+                    WHEN description LIKE ? THEN 2
+                    ELSE 1
+                END DESC
+            ", [$this->q . '%', '%' . $this->q . '%']);
+        } else {
+            $query->orderBy($this->sortBy, $this->sortDirection);
+        }
+
+        return $this->type === 'tags' 
+            ? $query->paginate(10)
+            : $query->limit(5)->get();
+    }
+
     public function getTotalResultsProperty()
     {
         $total = 0;
@@ -141,6 +239,18 @@ class SearchResults extends Component
         
         if (auth()->user()->can('activity-logs.view')) {
             $total += Activity::multiColumnSearch($this->q)->count();
+        }
+        
+        if (auth()->user()->can('posts.view')) {
+            $total += Post::multiColumnSearch($this->q)->count();
+        }
+        
+        if (auth()->user()->can('categories.view')) {
+            $total += Category::multiColumnSearch($this->q)->count();
+        }
+        
+        if (auth()->user()->can('tags.view')) {
+            $total += Tag::multiColumnSearch($this->q)->count();
         }
         
         return $total;
@@ -158,6 +268,18 @@ class SearchResults extends Component
             $results['activities'] = Activity::multiColumnSearch($this->q)->count();
         }
         
+        if (auth()->user()->can('posts.view')) {
+            $results['posts'] = Post::multiColumnSearch($this->q)->count();
+        }
+        
+        if (auth()->user()->can('categories.view')) {
+            $results['categories'] = Category::multiColumnSearch($this->q)->count();
+        }
+        
+        if (auth()->user()->can('tags.view')) {
+            $results['tags'] = Tag::multiColumnSearch($this->q)->count();
+        }
+        
         return $results;
     }
 
@@ -166,6 +288,9 @@ class SearchResults extends Component
         return view('livewire.admin.search-results', [
             'users' => $this->users,
             'activities' => $this->activities,
+            'posts' => $this->posts,
+            'categories' => $this->categories,
+            'tags' => $this->tags,
             'totalResults' => $this->totalResults,
             'resultsByType' => $this->resultsByType,
         ])->extends('layouts.admin')->section('content');

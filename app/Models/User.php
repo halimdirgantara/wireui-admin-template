@@ -112,4 +112,12 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(Activity::class);
     }
+
+    /**
+     * Get the blog posts for the user.
+     */
+    public function posts(): HasMany
+    {
+        return $this->hasMany(\App\Models\Post::class);
+    }
 }

@@ -192,7 +192,226 @@
             </div>
         @endif
 
-        @if($type === 'all' && ($users->count() > 0 || $activities->count() > 0))
+        <!-- Blog Posts Results -->
+        @if(($type === 'all' || $type === 'posts') && $posts->count() > 0)
+            <div class="flat-card">
+                <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                    <h4 class="text-lg font-medium text-gray-900 dark:text-white flex items-center">
+                        <x-icon name="document-text" class="w-5 h-5 mr-2 text-primary-500" />
+                        Blog Posts
+                        @if($type === 'all')
+                            <span class="ml-2 text-sm text-gray-500">({{ $posts->count() }} shown)</span>
+                        @endif
+                    </h4>
+                </div>
+                
+                <div class="divide-y divide-gray-200 dark:divide-gray-700">
+                    @foreach($posts as $post)
+                        <div class="p-6 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors duration-150">
+                            <div class="flex items-start space-x-4">
+                                @if($post->featured_image)
+                                    <img src="{{ asset('storage/' . $post->featured_image) }}" 
+                                         alt="{{ $post->title }}" 
+                                         class="w-16 h-12 object-cover rounded-lg flex-shrink-0">
+                                @else
+                                    <div class="w-16 h-12 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <x-icon name="document-text" class="w-6 h-6 text-gray-500" />
+                                    </div>
+                                @endif
+                                
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center justify-between">
+                                        <h5 class="text-base font-medium text-gray-900 dark:text-white">
+                                            <a href="{{ route('admin.blog.posts.edit', $post) }}" class="hover:text-primary-600 dark:hover:text-primary-400">
+                                                {!! (new \App\Models\Post())->highlightSearchResults($post->title, $q) !!}
+                                            </a>
+                                            @if($post->is_featured)
+                                                <x-icon name="star" class="w-4 h-4 text-yellow-500 inline ml-1" solid />
+                                            @endif
+                                        </h5>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 text-xs font-medium rounded-full
+                                            @if($post->status === 'published') bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400
+                                            @elseif($post->status === 'draft') bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400
+                                            @elseif($post->status === 'scheduled') bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400
+                                            @else bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400
+                                            @endif">
+                                            {{ $post->status_label }}
+                                        </span>
+                                    </div>
+                                    
+                                    @if($post->excerpt)
+                                        <p class="text-sm text-gray-600 dark:text-gray-300 mt-1 line-clamp-2">
+                                            {!! (new \App\Models\Post())->highlightSearchResults($post->excerpt, $q) !!}
+                                        </p>
+                                    @endif
+                                    
+                                    <div class="flex items-center gap-4 mt-2 text-xs text-gray-500 dark:text-gray-400">
+                                        @if($post->user)
+                                            <span>by {{ $post->user->name }}</span>
+                                        @endif
+                                        @if($post->category)
+                                            <span>in {{ $post->category->name }}</span>
+                                        @endif
+                                        <span>{{ $post->created_at->format('M d, Y') }}</span>
+                                        @if($post->views_count)
+                                            <span>{{ number_format($post->views_count) }} views</span>
+                                        @endif
+                                    </div>
+                                    
+                                    @if($post->tags->count() > 0)
+                                        <div class="flex flex-wrap gap-1 mt-2">
+                                            @foreach($post->tags->take(3) as $tag)
+                                                <span class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full {{ $tag->color_class }}">
+                                                    {{ $tag->name }}
+                                                </span>
+                                            @endforeach
+                                            @if($post->tags->count() > 3)
+                                                <span class="text-xs text-gray-500 dark:text-gray-400">
+                                                    +{{ $post->tags->count() - 3 }} more
+                                                </span>
+                                            @endif
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+
+                @if($type === 'posts' && method_exists($posts, 'hasPages') && $posts->hasPages())
+                    <div class="p-6 border-t border-gray-200 dark:border-gray-700">
+                        {{ $posts->links() }}
+                    </div>
+                @endif
+            </div>
+        @endif
+
+        <!-- Categories Results -->
+        @if(($type === 'all' || $type === 'categories') && $categories->count() > 0)
+            <div class="flat-card">
+                <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                    <h4 class="text-lg font-medium text-gray-900 dark:text-white flex items-center">
+                        <x-icon name="rectangle-stack" class="w-5 h-5 mr-2 text-primary-500" />
+                        Categories
+                        @if($type === 'all')
+                            <span class="ml-2 text-sm text-gray-500">({{ $categories->count() }} shown)</span>
+                        @endif
+                    </h4>
+                </div>
+                
+                <div class="divide-y divide-gray-200 dark:divide-gray-700">
+                    @foreach($categories as $category)
+                        <div class="p-6 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors duration-150">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-4 h-4 rounded-full flex-shrink-0" style="background-color: {{ $category->color }}"></div>
+                                    
+                                    <div class="flex-1 min-w-0">
+                                        <h5 class="text-sm font-medium text-gray-900 dark:text-white">
+                                            <a href="{{ route('admin.blog.categories.index') }}" class="hover:text-primary-600 dark:hover:text-primary-400">
+                                                {!! (new \App\Models\Category())->highlightSearchResults($category->name, $q) !!}
+                                            </a>
+                                        </h5>
+                                        @if($category->description)
+                                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                                {!! (new \App\Models\Category())->highlightSearchResults($category->description, $q) !!}
+                                            </p>
+                                        @endif
+                                        <div class="flex items-center gap-4 mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                            <span>{{ number_format($category->posts_count) }} posts</span>
+                                            @if($category->parent)
+                                                <span>under {{ $category->parent->name }}</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center space-x-2">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 text-xs font-medium rounded-full
+                                        {{ $category->is_active 
+                                            ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' 
+                                            : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' 
+                                        }}">
+                                        {{ $category->is_active ? 'Active' : 'Inactive' }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+
+                @if($type === 'categories' && method_exists($categories, 'hasPages') && $categories->hasPages())
+                    <div class="p-6 border-t border-gray-200 dark:border-gray-700">
+                        {{ $categories->links() }}
+                    </div>
+                @endif
+            </div>
+        @endif
+
+        <!-- Tags Results -->
+        @if(($type === 'all' || $type === 'tags') && $tags->count() > 0)
+            <div class="flat-card">
+                <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                    <h4 class="text-lg font-medium text-gray-900 dark:text-white flex items-center">
+                        <x-icon name="tag" class="w-5 h-5 mr-2 text-primary-500" />
+                        Tags
+                        @if($type === 'all')
+                            <span class="ml-2 text-sm text-gray-500">({{ $tags->count() }} shown)</span>
+                        @endif
+                    </h4>
+                </div>
+                
+                <div class="divide-y divide-gray-200 dark:divide-gray-700">
+                    @foreach($tags as $tag)
+                        <div class="p-6 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors duration-150">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-4">
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center gap-3">
+                                            <span class="inline-flex items-center px-3 py-1 text-sm font-medium rounded-full {{ $tag->color_class }}">
+                                                {!! (new \App\Models\Tag())->highlightSearchResults($tag->name, $q) !!}
+                                            </span>
+                                        </div>
+                                        @if($tag->description)
+                                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                                                {!! (new \App\Models\Tag())->highlightSearchResults($tag->description, $q) !!}
+                                            </p>
+                                        @endif
+                                        <div class="flex items-center gap-4 mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                            <span>{{ number_format($tag->posts_count ?? 0) }} posts</span>
+                                            <span>Created {{ $tag->created_at->format('M d, Y') }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center space-x-2">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 text-xs font-medium rounded-full
+                                        {{ $tag->is_active 
+                                            ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' 
+                                            : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' 
+                                        }}">
+                                        {{ $tag->is_active ? 'Active' : 'Inactive' }}
+                                    </span>
+                                    
+                                    <a href="{{ route('admin.blog.tags.index') }}" 
+                                       class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-150">
+                                        View
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+
+                @if($type === 'tags' && method_exists($tags, 'hasPages') && $tags->hasPages())
+                    <div class="p-6 border-t border-gray-200 dark:border-gray-700">
+                        {{ $tags->links() }}
+                    </div>
+                @endif
+            </div>
+        @endif
+
+        @if($type === 'all' && ($users->count() > 0 || $activities->count() > 0 || $posts->count() > 0 || $categories->count() > 0 || $tags->count() > 0))
             <div class="flex justify-center">
                 <div class="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg p-4">
                     <p class="text-sm text-gray-600 dark:text-gray-400 text-center">

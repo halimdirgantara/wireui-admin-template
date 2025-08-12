@@ -8,18 +8,19 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Str;
-use Spatie\Activitylog\LogsActivity;
-use Spatie\Activitylog\Traits\LogsActivity as LogsActivityTrait;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
-class Tag extends Model implements LogsActivity
+class Tag extends Model
 {
-    use HasFactory, AdvancedSearchable, LogsActivityTrait;
+    use HasFactory, AdvancedSearchable, LogsActivity;
 
     protected $fillable = [
         'name',
         'slug',
         'description',
         'color',
+        'meta_keywords',
         'is_active'
     ];
 
@@ -27,34 +28,32 @@ class Tag extends Model implements LogsActivity
         'is_active' => 'boolean'
     ];
 
-    protected $searchableColumns = [
-        'name',
-        'slug',
-        'description'
-    ];
-
-    protected $dateColumns = [
-        'created_at',
-        'updated_at'
-    ];
-
-    protected static $logAttributes = [
-        'name',
-        'slug',
-        'description',
-        'color',
-        'is_active'
-    ];
-
-    protected static $logName = 'tag';
-
-    protected static $logOnlyDirty = true;
-
-    protected static $submitEmptyLogs = false;
-
-    public function getDescriptionForEvent(string $eventName): string
+    public function __construct(array $attributes = [])
     {
-        return "Tag {$this->name} was {$eventName}";
+        parent::__construct($attributes);
+        
+        // Configure searchable columns
+        $this->searchableColumns = [
+            'name',
+            'slug',
+            'description'
+        ];
+        
+        // Configure date columns for filtering
+        $this->dateColumns = [
+            'created_at',
+            'updated_at'
+        ];
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['name', 'slug', 'description', 'color', 'is_active'])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->useLogName('tag')
+            ->setDescriptionForEvent(fn(string $eventName) => "Tag '{$this->name}' was {$eventName}");
     }
 
     public function posts(): BelongsToMany

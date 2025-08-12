@@ -9,12 +9,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
-use Spatie\Activitylog\LogsActivity;
-use Spatie\Activitylog\Traits\LogsActivity as LogsActivityTrait;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
-class Category extends Model implements LogsActivity
+class Category extends Model
 {
-    use HasFactory, AdvancedSearchable, LogsActivityTrait;
+    use HasFactory, AdvancedSearchable, LogsActivity;
 
     protected $fillable = [
         'name',
@@ -37,38 +37,35 @@ class Category extends Model implements LogsActivity
         'parent_id' => 'integer'
     ];
 
-    protected $searchableColumns = [
-        'name',
-        'slug', 
-        'description',
-        'seo_title',
-        'seo_description',
-        'meta_keywords'
-    ];
-
-    protected $dateColumns = [
-        'created_at',
-        'updated_at'
-    ];
-
-    protected static $logAttributes = [
-        'name',
-        'slug',
-        'description',
-        'parent_id',
-        'is_active',
-        'sort_order'
-    ];
-
-    protected static $logName = 'category';
-
-    protected static $logOnlyDirty = true;
-
-    protected static $submitEmptyLogs = false;
-
-    public function getDescriptionForEvent(string $eventName): string
+    public function __construct(array $attributes = [])
     {
-        return "Category {$this->name} was {$eventName}";
+        parent::__construct($attributes);
+        
+        // Configure searchable columns
+        $this->searchableColumns = [
+            'name',
+            'slug', 
+            'description',
+            'seo_title',
+            'seo_description',
+            'meta_keywords'
+        ];
+        
+        // Configure date columns for filtering
+        $this->dateColumns = [
+            'created_at',
+            'updated_at'
+        ];
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['name', 'slug', 'description', 'parent_id', 'is_active', 'sort_order'])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->useLogName('category')
+            ->setDescriptionForEvent(fn(string $eventName) => "Category '{$this->name}' was {$eventName}");
     }
 
     public function parent(): BelongsTo

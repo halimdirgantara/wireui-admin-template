@@ -37,8 +37,83 @@
 </div>
 @endif
 
+<!-- Blog Statistics (if user has blog permissions) -->
+@if(count($blogStats) > 0)
+<div class="mb-8">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Total Posts -->
+        <x-card class="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 border border-blue-200/50 dark:border-blue-700/50">
+            <div class="p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+                            <x-icon name="document-text" class="w-4 h-4 text-white" />
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-blue-600 dark:text-blue-400">Total Posts</p>
+                        <p class="text-2xl font-bold text-blue-900 dark:text-blue-100">{{ number_format($blogStats['total_posts']) }}</p>
+                    </div>
+                </div>
+            </div>
+        </x-card>
+
+        <!-- Published Posts -->
+        <x-card class="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/30 border border-green-200/50 dark:border-green-700/50">
+            <div class="p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
+                            <x-icon name="eye" class="w-4 h-4 text-white" />
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-green-600 dark:text-green-400">Published</p>
+                        <p class="text-2xl font-bold text-green-900 dark:text-green-100">{{ number_format($blogStats['published_posts']) }}</p>
+                    </div>
+                </div>
+            </div>
+        </x-card>
+
+        <!-- Categories -->
+        <x-card class="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/30 border border-purple-200/50 dark:border-purple-700/50">
+            <div class="p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center">
+                            <x-icon name="rectangle-stack" class="w-4 h-4 text-white" />
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-purple-600 dark:text-purple-400">Categories</p>
+                        <p class="text-2xl font-bold text-purple-900 dark:text-purple-100">{{ number_format($blogStats['total_categories']) }}</p>
+                    </div>
+                </div>
+            </div>
+        </x-card>
+
+        <!-- Total Views -->
+        <x-card class="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/30 dark:to-orange-800/30 border border-orange-200/50 dark:border-orange-700/50">
+            <div class="p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
+                            <x-icon name="chart-bar" class="w-4 h-4 text-white" />
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-orange-600 dark:text-orange-400">Total Views</p>
+                        <p class="text-2xl font-bold text-orange-900 dark:text-orange-100">{{ number_format($blogStats['total_views']) }}</p>
+                    </div>
+                </div>
+            </div>
+        </x-card>
+    </div>
+</div>
+@endif
+
 <!-- Role Distribution and Quick Stats -->
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+<div class="grid grid-cols-1 lg:grid-cols-{{ count($blogStats) > 0 ? '3' : '2' }} gap-6 mb-8">
     <!-- Role Distribution Card -->
     <x-card class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
         <div class="p-6">
@@ -86,6 +161,41 @@
             </div>
         </div>
     </x-card>
+
+    <!-- Blog Summary Card (if user has blog permissions) -->
+    @if(count($blogStats) > 0)
+        <x-card class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+            <div class="p-6">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Blog Overview</h3>
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between py-2">
+                        <span class="text-sm text-gray-600 dark:text-gray-400">Draft Posts</span>
+                        <span class="text-sm font-medium text-gray-600 dark:text-gray-400">{{ number_format($blogStats['draft_posts']) }}</span>
+                    </div>
+                    <div class="flex items-center justify-between py-2">
+                        <span class="text-sm text-gray-600 dark:text-gray-400">Scheduled Posts</span>
+                        <span class="text-sm font-medium text-blue-600 dark:text-blue-400">{{ number_format($blogStats['scheduled_posts']) }}</span>
+                    </div>
+                    <div class="flex items-center justify-between py-2">
+                        <span class="text-sm text-gray-600 dark:text-gray-400">Active Tags</span>
+                        <span class="text-sm font-medium text-green-600 dark:text-green-400">{{ number_format($blogStats['active_tags']) }}</span>
+                    </div>
+                    <div class="flex items-center justify-between py-2">
+                        <span class="text-sm text-gray-600 dark:text-gray-400">Posts Today</span>
+                        <span class="text-sm font-medium text-orange-600 dark:text-orange-400">{{ number_format($blogStats['today_posts']) }}</span>
+                    </div>
+                </div>
+                <div class="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    @can('posts.create')
+                        <a href="{{ route('admin.blog.posts.create') }}" class="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300">
+                            <x-icon name="plus" class="w-4 h-4 mr-1" />
+                            Create New Post
+                        </a>
+                    @endcan
+                </div>
+            </div>
+        </x-card>
+    @endif
 </div>
 
 <!-- Recent Activities Section -->
@@ -141,4 +251,85 @@
         </div>
     </x-card>
 </div>
+
+<!-- Recent Blog Posts (if user has blog permissions) -->
+@if(count($recentPosts) > 0)
+<div class="mb-8">
+    <x-card class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white">Recent Blog Posts</h3>
+        </div>
+        <div class="p-6">
+            <div class="space-y-4">
+                @foreach($recentPosts as $post)
+                    <div class="flex items-start space-x-4 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                        @if($post->featured_image)
+                            <img src="{{ asset('storage/' . $post->featured_image) }}" 
+                                 alt="{{ $post->title }}" 
+                                 class="w-16 h-12 object-cover rounded-lg flex-shrink-0">
+                        @else
+                            <div class="w-16 h-12 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <x-icon name="document-text" class="w-6 h-6 text-gray-400" />
+                            </div>
+                        @endif
+                        
+                        <div class="flex-1 min-w-0">
+                            <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                                <a href="{{ route('admin.blog.posts.edit', $post) }}" class="hover:text-blue-600 dark:hover:text-blue-400">
+                                    {{ $post->title }}
+                                </a>
+                                @if($post->is_featured)
+                                    <x-icon name="star" class="w-3 h-3 text-yellow-500 inline ml-1" solid />
+                                @endif
+                            </h4>
+                            
+                            @if($post->excerpt)
+                                <p class="text-xs text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
+                                    {{ $post->excerpt }}
+                                </p>
+                            @endif
+                            
+                            <div class="flex items-center space-x-2 mt-1">
+                                <span class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full
+                                    @if($post->status === 'published') bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400
+                                    @elseif($post->status === 'draft') bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400
+                                    @elseif($post->status === 'scheduled') bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400
+                                    @else bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400
+                                    @endif">
+                                    {{ $post->status_label }}
+                                </span>
+                                
+                                <span class="text-xs text-gray-500 dark:text-gray-400">by {{ $post->user->name }}</span>
+                                
+                                @if($post->category)
+                                    <span class="text-xs text-gray-400">•</span>
+                                    <span class="text-xs text-gray-500 dark:text-gray-400">{{ $post->category->name }}</span>
+                                @endif
+                                
+                                <span class="text-xs text-gray-400">•</span>
+                                <span class="text-xs text-gray-500 dark:text-gray-400">{{ $post->created_at->format('M d, Y') }}</span>
+                                
+                                @if($post->views_count)
+                                    <span class="text-xs text-gray-400">•</span>
+                                    <span class="text-xs text-gray-500 dark:text-gray-400">{{ number_format($post->views_count) }} views</span>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+            
+            <div class="mt-6 text-center border-t border-gray-200 dark:border-gray-700 pt-4">
+                @can('posts.view')
+                    <a href="{{ route('admin.blog.posts.index') }}" class="text-sm text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 font-medium">
+                        View All Posts →
+                    </a>
+                @else
+                    <span class="text-sm text-gray-500 dark:text-gray-400">Showing {{ count($recentPosts) }} recent posts</span>
+                @endcan
+            </div>
+        </div>
+    </x-card>
+</div>
+@endif
 </div>

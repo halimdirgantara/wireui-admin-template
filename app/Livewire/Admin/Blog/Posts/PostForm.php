@@ -8,13 +8,13 @@ use App\Models\Tag;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use WireUi\Traits\Actions;
+use WireUi\Traits\WireUiActions;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 
 class PostForm extends Component
 {
-    use WithFileUploads, Actions, AuthorizesRequests;
+    use WithFileUploads, WireUiActions, AuthorizesRequests;
 
     public Post $post;
     public bool $isEditing = false;
@@ -92,11 +92,11 @@ class PostForm extends Component
         if ($postId) {
             $this->post = Post::with('tags')->findOrFail($postId);
             $this->isEditing = true;
-            
+
             if (!$this->canUpdatePost($this->post)) {
                 abort(403, 'Unauthorized to edit this post.');
             }
-            
+
             $this->loadPostData();
         } else {
             $this->authorize('posts.create');
@@ -132,7 +132,7 @@ class PostForm extends Component
         if (!$this->isEditing || empty($this->slug)) {
             $this->slug = Str::slug($value);
         }
-        
+
         if (empty($this->seo_title)) {
             $this->seo_title = Str::limit($value, 60);
         }
@@ -143,7 +143,7 @@ class PostForm extends Component
         if (empty($this->excerpt)) {
             $this->excerpt = Str::limit(strip_tags($value), 160);
         }
-        
+
         if (empty($this->seo_description)) {
             $this->seo_description = Str::limit(strip_tags($value), 160);
         }
@@ -175,12 +175,12 @@ class PostForm extends Component
                 'color' => '#3b82f6',
                 'is_active' => true
             ]);
-            
+
             if (!in_array($tag->id, $this->selectedTags)) {
                 $this->selectedTags[] = $tag->id;
             }
         }
-        
+
         $this->tagInput = '';
         $this->suggestedTags = [];
     }
@@ -218,25 +218,25 @@ class PostForm extends Component
     public function saveAndPublish()
     {
         $this->authorize('posts.publish');
-        
+
         $this->status = Post::STATUS_PUBLISHED;
         if (empty($this->published_at)) {
             $this->published_at = now()->format('Y-m-d\TH:i');
         }
-        
+
         $this->save();
     }
 
     public function schedulePost()
     {
         $this->authorize('posts.schedule');
-        
+
         $this->validate([
             'published_at' => 'required|date|after:now'
         ], [
             'published_at.after' => 'Scheduled date must be in the future.'
         ]);
-        
+
         $this->status = Post::STATUS_SCHEDULED;
         $this->save();
     }
@@ -295,7 +295,7 @@ class PostForm extends Component
             );
 
             // Redirect to posts index
-            return redirect()->route('admin.posts.index');
+            return redirect()->route('admin.blog.posts.index');
 
         } catch (\Exception $e) {
             $this->notification()->error(
@@ -332,7 +332,7 @@ class PostForm extends Component
 
     private function canUpdatePost(Post $post): bool
     {
-        return auth()->user()->can('posts.update-all') || 
+        return auth()->user()->can('posts.update-all') ||
                (auth()->user()->can('posts.update-own') && $post->user_id === auth()->id());
     }
 

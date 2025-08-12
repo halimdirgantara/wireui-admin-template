@@ -3,6 +3,9 @@
 namespace App\Livewire\Admin;
 
 use App\Models\User;
+use App\Models\Post;
+use App\Models\Category;
+use App\Models\Tag;
 use Livewire\Component;
 use Illuminate\Support\Carbon;
 use Livewire\Attributes\Layout;
@@ -25,6 +28,23 @@ class Dashboard extends Component
             'total_roles' => Role::count(),
             'today_activities' => Activity::whereDate('created_at', Carbon::today())->count(),
         ];
+        
+        // Blog statistics (only if user has blog permissions)
+        $blogStats = [];
+        if (auth()->user()->can('posts.view')) {
+            $blogStats = [
+                'total_posts' => Post::count(),
+                'published_posts' => Post::where('status', 'published')->count(),
+                'draft_posts' => Post::where('status', 'draft')->count(),
+                'scheduled_posts' => Post::where('status', 'scheduled')->count(),
+                'total_categories' => Category::count(),
+                'active_categories' => Category::where('is_active', true)->count(),
+                'total_tags' => Tag::count(),
+                'active_tags' => Tag::where('is_active', true)->count(),
+                'total_views' => Post::sum('views_count'),
+                'today_posts' => Post::whereDate('created_at', Carbon::today())->count(),
+            ];
+        }
         
         // Role Distribution for existing view compatibility
         $roleDistribution = Role::withCount('users')
@@ -55,10 +75,21 @@ class Dashboard extends Component
                 ];
             });
 
+        // Recent blog posts (if user has permission)
+        $recentPosts = [];
+        if (auth()->user()->can('posts.view')) {
+            $recentPosts = Post::with(['user', 'category'])
+                ->latest()
+                ->limit(5)
+                ->get();
+        }
+
         return view('livewire.admin.dashboard', compact(
             'quickStats',
+            'blogStats',
             'roleDistribution',
-            'recentActivities'
+            'recentActivities',
+            'recentPosts'
         ));
     }
 
