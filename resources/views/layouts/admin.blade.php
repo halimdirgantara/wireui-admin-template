@@ -38,6 +38,10 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <wireui:scripts />
     @livewireStyles
+    
+    <!-- Quill Editor -->
+    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.0-rc.5/dist/quill.snow.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.0-rc.5/dist/quill.js"></script>
 </head>
 <body class="font-sans antialiased min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
     <div class="flex h-screen overflow-hidden">

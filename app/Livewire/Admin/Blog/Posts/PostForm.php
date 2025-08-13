@@ -11,6 +11,8 @@ use Livewire\WithFileUploads;
 use WireUi\Traits\WireUiActions;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
+use Intervention\Image\ImageManagerStatic as Image;
 
 class PostForm extends Component
 {
@@ -194,6 +196,57 @@ class PostForm extends Component
     {
         if (!empty($this->tagInput)) {
             $this->addTag(null, $this->tagInput);
+        }
+    }
+
+    public function uploadImage($image)
+    {
+        try {
+            $imageData = substr($image, strpos($image, ',') + 1);
+            $length = strlen($imageData);
+            $lastSixCharacters = substr($imageData, $length - 20);
+            $imageData = base64_decode($imageData);
+            $filename = $lastSixCharacters . '.png';
+
+            // Create directory if it doesn't exist
+            if (!Storage::disk('public')->exists('blog_photos')) {
+                Storage::disk('public')->makeDirectory('blog_photos');
+            }
+
+            // Resize image using Intervention Image if available, otherwise just save
+            if (class_exists('Intervention\Image\ImageManagerStatic')) {
+                $resizedImage = Image::make($imageData)->resize(null, 400, function ($constraint) {
+                    $constraint->aspectRatio();
+                });
+                Storage::disk('public')->put('blog_photos/' . $filename, $resizedImage->encode());
+            } else {
+                Storage::disk('public')->put('blog_photos/' . $filename, $imageData);
+            }
+
+            $url = asset('storage/blog_photos/' . $filename);
+            $this->dispatch('blogimageUploaded', $url);
+
+            return $url;
+        } catch (\Exception $e) {
+            $this->notification()->error('Error', 'Failed to upload image. Please try again.');
+            return null;
+        }
+    }
+
+    public function deleteImage($imageSrc)
+    {
+        try {
+            // Extract filename from URL
+            $path = parse_url($imageSrc, PHP_URL_PATH);
+            $filename = basename($path);
+            
+            // Check if file exists and delete it
+            if (Storage::disk('public')->exists('blog_photos/' . $filename)) {
+                Storage::disk('public')->delete('blog_photos/' . $filename);
+            }
+        } catch (\Exception $e) {
+            // Silently handle errors as this is called from client-side
+            \Log::error('Failed to delete image: ' . $e->getMessage());
         }
     }
 

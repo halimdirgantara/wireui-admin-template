@@ -138,7 +138,7 @@
                                 <x-checkbox wire:model.live="selectAll" />
                             </th>
                             <th class="px-4 py-3 text-left">
-                                <button wire:click="sortBy('title')" class="flex items-center gap-1 text-xs font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
+                                <button wire:click="sortBy('title')" class="flex items-center gap-1 text-xs font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white cursor-pointer">
                                     Title
                                     @if($sortBy === 'title')
                                         <x-icon name="{{ $sortDirection === 'asc' ? 'chevron-up' : 'chevron-down' }}" class="w-3 h-3" />
@@ -146,7 +146,7 @@
                                 </button>
                             </th>
                             <th class="px-4 py-3 text-left">
-                                <button wire:click="sortBy('status')" class="flex items-center gap-1 text-xs font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
+                                <button wire:click="sortBy('status')" class="flex items-center gap-1 text-xs font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white cursor-pointer">
                                     Status
                                     @if($sortBy === 'status')
                                         <x-icon name="{{ $sortDirection === 'asc' ? 'chevron-up' : 'chevron-down' }}" class="w-3 h-3" />
@@ -155,7 +155,7 @@
                             </th>
                             <th class="px-4 py-3 text-left">Category</th>
                             <th class="px-4 py-3 text-left">
-                                <button wire:click="sortBy('user.name')" class="flex items-center gap-1 text-xs font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
+                                <button wire:click="sortBy('user.name')" class="flex items-center gap-1 text-xs font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white cursor-pointer">
                                     Author
                                     @if($sortBy === 'user.name')
                                         <x-icon name="{{ $sortDirection === 'asc' ? 'chevron-up' : 'chevron-down' }}" class="w-3 h-3" />
@@ -163,7 +163,7 @@
                                 </button>
                             </th>
                             <th class="px-4 py-3 text-left">
-                                <button wire:click="sortBy('views_count')" class="flex items-center gap-1 text-xs font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
+                                <button wire:click="sortBy('views_count')" class="flex items-center gap-1 text-xs font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white cursor-pointer">
                                     Views
                                     @if($sortBy === 'views_count')
                                         <x-icon name="{{ $sortDirection === 'asc' ? 'chevron-up' : 'chevron-down' }}" class="w-3 h-3" />
@@ -171,7 +171,7 @@
                                 </button>
                             </th>
                             <th class="px-4 py-3 text-left">
-                                <button wire:click="sortBy('created_at')" class="flex items-center gap-1 text-xs font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
+                                <button wire:click="sortBy('created_at')" class="flex items-center gap-1 text-xs font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white cursor-pointer">
                                     Created
                                     @if($sortBy === 'created_at')
                                         <x-icon name="{{ $sortDirection === 'asc' ? 'chevron-up' : 'chevron-down' }}" class="w-3 h-3" />

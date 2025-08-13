@@ -86,7 +86,7 @@
                                 <x-checkbox wire:model.live="selectAll" />
                             </th>
                             <th class="px-4 py-3 text-left">
-                                <button wire:click="sortBy('name')" class="flex items-center gap-1 text-xs font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
+                                <button wire:click="sortBy('name')" class="flex items-center gap-1 text-xs font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white cursor-pointer">
                                     Name
                                     @if($sortBy === 'name')
                                         <x-icon name="{{ $sortDirection === 'asc' ? 'chevron-up' : 'chevron-down' }}" class="w-3 h-3" />
@@ -94,7 +94,7 @@
                                 </button>
                             </th>
                             <th class="px-4 py-3 text-left">
-                                <button wire:click="sortBy('posts_count')" class="flex items-center gap-1 text-xs font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
+                                <button wire:click="sortBy('posts_count')" class="flex items-center gap-1 text-xs font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white cursor-pointer">
                                     Posts
                                     @if($sortBy === 'posts_count')
                                         <x-icon name="{{ $sortDirection === 'asc' ? 'chevron-up' : 'chevron-down' }}" class="w-3 h-3" />
@@ -103,7 +103,7 @@
                             </th>
                             <th class="px-4 py-3 text-left">Status</th>
                             <th class="px-4 py-3 text-left">
-                                <button wire:click="sortBy('created_at')" class="flex items-center gap-1 text-xs font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
+                                <button wire:click="sortBy('created_at')" class="flex items-center gap-1 text-xs font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white cursor-pointer">
                                     Created
                                     @if($sortBy === 'created_at')
                                         <x-icon name="{{ $sortDirection === 'asc' ? 'chevron-up' : 'chevron-down' }}" class="w-3 h-3" />
