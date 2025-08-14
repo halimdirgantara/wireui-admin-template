@@ -163,9 +163,14 @@
                                 {{-- Tags --}}
                                 <div>
                                     <x-label for="tag-input" value="Tags" />
-                                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">
-                                        Type tag names and press comma, space, or Enter to add them
-                                    </p>
+                                    <div class="flex items-center justify-between mb-2">
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">
+                                            Type tag names and press comma or Enter to add them
+                                        </p>
+                                        <button type="button" wire:click="testTagCreation" class="text-xs text-blue-500 hover:text-blue-600 cursor-pointer">
+                                            Test Tag Creation
+                                        </button>
+                                    </div>
                                     <div class="mt-2 space-y-3">
                                         {{-- Selected Tags --}}
                                         @if (count($selectedTags) > 0)
@@ -188,7 +193,7 @@
                                         <div class="relative">
                                             <input 
                                                 type="text" 
-                                                wire:model.live.debounce.300ms="tagInput" 
+                                                wire:model.live="tagInput" 
                                                 id="tag-input"
                                                 placeholder="Type to search or create tags (separate with commas)..."
                                                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
@@ -198,12 +203,16 @@
                                                             event.preventDefault();
                                                             if (event.target.value.trim()) {
                                                                 @this.addTag(null, event.target.value.trim());
+                                                                event.target.value = '';
+                                                                @this.set('tagInput', '');
                                                             }
                                                         } else if (event.key === ',') {
                                                             event.preventDefault();
                                                             const value = event.target.value.trim();
                                                             if (value) {
                                                                 @this.addTag(null, value);
+                                                                event.target.value = '';
+                                                                @this.set('tagInput', '');
                                                             }
                                                         }
                                                     },
@@ -213,6 +222,7 @@
                                                             if (value.includes(',')) {
                                                                 event.target.value = '';
                                                                 @this.addMultipleTags(value);
+                                                                @this.set('tagInput', '');
                                                             }
                                                         }, 10);
                                                     }

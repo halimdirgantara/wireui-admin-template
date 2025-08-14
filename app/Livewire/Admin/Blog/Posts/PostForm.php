@@ -194,7 +194,7 @@ class PostForm extends Component
                 if (empty($tagName)) {
                     return;
                 }
-                
+
                 // Check if tag already exists by name
                 $existingTag = Tag::where('name', $tagName)->first();
                 if ($existingTag) {
@@ -242,7 +242,7 @@ class PostForm extends Component
             $this->addTag(null, trim($this->tagInput));
         }
     }
-    
+
     // Debug method to test tag creation
     public function testTagCreation()
     {
@@ -252,7 +252,7 @@ class PostForm extends Component
     public function addMultipleTags($tagNames)
     {
         $tags = array_map('trim', is_array($tagNames) ? $tagNames : explode(',', $tagNames));
-        
+
         foreach ($tags as $tagName) {
             if (!empty($tagName)) {
                 $this->addTag(null, $tagName);
