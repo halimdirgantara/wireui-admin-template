@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\User;
+use App\Models\Post;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Http\Request;
@@ -102,6 +103,17 @@ class RouteServiceProvider extends ServiceProvider
             }
             
             return $user;
+        });
+        
+        // Post model binding with tags loaded
+        Route::bind('post', function (string $value, \Illuminate\Routing\Route $route) {
+            $post = Post::with('tags')->where('id', $value)->first();
+            
+            if (!$post) {
+                abort(404, 'Post not found.');
+            }
+            
+            return $post;
         });
     }
     

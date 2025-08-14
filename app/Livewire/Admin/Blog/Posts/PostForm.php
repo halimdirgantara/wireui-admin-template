@@ -89,10 +89,20 @@ class PostForm extends Component
         'featured_image_upload.max' => 'Featured image must be less than 5MB.',
     ];
 
-    public function mount($postId = null)
+    public function mount($post = null)
     {
-        if ($postId) {
-            $this->post = Post::with('tags')->findOrFail($postId);
+        if ($post) {
+            // Handle both route model binding and manual ID passing
+            if (is_numeric($post)) {
+                $this->post = Post::with('tags')->findOrFail($post);
+            } else {
+                $this->post = $post;
+                // Ensure tags are loaded if not already
+                if (!$this->post->relationLoaded('tags')) {
+                    $this->post->load('tags');
+                }
+            }
+
             $this->isEditing = true;
 
             if (!$this->canUpdatePost($this->post)) {
@@ -127,6 +137,14 @@ class PostForm extends Component
         $this->custom_js = $this->post->custom_js;
         $this->current_featured_image = $this->post->featured_image;
         $this->selectedTags = $this->post->tags->pluck('id')->toArray();
+    }
+
+    public function hydrate()
+    {
+        // Ensure content is available for Quill editor after hydration
+        if ($this->isEditing && $this->content) {
+            $this->dispatch('contentUpdated', $this->content);
+        }
     }
 
     public function updatedTitle($value)
@@ -165,26 +183,52 @@ class PostForm extends Component
 
     public function addTag($tagId = null, $tagName = null)
     {
-        if ($tagId) {
-            // Add existing tag
-            if (!in_array($tagId, $this->selectedTags)) {
-                $this->selectedTags[] = $tagId;
-            }
-        } elseif ($tagName) {
-            // Create new tag and add it
-            $tag = Tag::firstOrCreate(['name' => $tagName], [
-                'slug' => Str::slug($tagName),
-                'color' => '#3b82f6',
-                'is_active' => true
-            ]);
+        try {
+            if ($tagId) {
+                // Add existing tag
+                if (!in_array($tagId, $this->selectedTags)) {
+                    $this->selectedTags[] = $tagId;
+                }
+            } elseif ($tagName) {
+                $tagName = trim($tagName);
+                if (empty($tagName)) {
+                    return;
+                }
+                
+                // Check if tag already exists by name
+                $existingTag = Tag::where('name', $tagName)->first();
+                if ($existingTag) {
+                    if (!in_array($existingTag->id, $this->selectedTags)) {
+                        $this->selectedTags[] = $existingTag->id;
+                    }
+                } else {
+                    // Create new tag
+                    $tag = Tag::create([
+                        'name' => $tagName,
+                        'slug' => Str::slug($tagName),
+                        'color' => '#3b82f6',
+                        'is_active' => true
+                    ]);
 
-            if (!in_array($tag->id, $this->selectedTags)) {
-                $this->selectedTags[] = $tag->id;
+                    if (!in_array($tag->id, $this->selectedTags)) {
+                        $this->selectedTags[] = $tag->id;
+                    }
+                }
+
+                $this->notification()->success(
+                    'Success',
+                    "Tag '{$tagName}' added successfully."
+                );
             }
+
+            $this->tagInput = '';
+            $this->suggestedTags = [];
+        } catch (\Exception $e) {
+            $this->notification()->error(
+                'Error',
+                'Failed to add tag: ' . $e->getMessage()
+            );
         }
-
-        $this->tagInput = '';
-        $this->suggestedTags = [];
     }
 
     public function removeTag($tagId)
@@ -195,7 +239,24 @@ class PostForm extends Component
     public function createTagFromInput()
     {
         if (!empty($this->tagInput)) {
-            $this->addTag(null, $this->tagInput);
+            $this->addTag(null, trim($this->tagInput));
+        }
+    }
+    
+    // Debug method to test tag creation
+    public function testTagCreation()
+    {
+        $this->addTag(null, 'test-tag-' . time());
+    }
+
+    public function addMultipleTags($tagNames)
+    {
+        $tags = array_map('trim', is_array($tagNames) ? $tagNames : explode(',', $tagNames));
+        
+        foreach ($tags as $tagName) {
+            if (!empty($tagName)) {
+                $this->addTag(null, $tagName);
+            }
         }
     }
 
@@ -239,7 +300,7 @@ class PostForm extends Component
             // Extract filename from URL
             $path = parse_url($imageSrc, PHP_URL_PATH);
             $filename = basename($path);
-            
+
             // Check if file exists and delete it
             if (Storage::disk('public')->exists('blog_photos/' . $filename)) {
                 Storage::disk('public')->delete('blog_photos/' . $filename);

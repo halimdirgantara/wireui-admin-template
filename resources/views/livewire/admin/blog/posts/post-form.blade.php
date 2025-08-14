@@ -163,6 +163,9 @@
                                 {{-- Tags --}}
                                 <div>
                                     <x-label for="tag-input" value="Tags" />
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                                        Type tag names and press comma, space, or Enter to add them
+                                    </p>
                                     <div class="mt-2 space-y-3">
                                         {{-- Selected Tags --}}
                                         @if (count($selectedTags) > 0)
@@ -183,9 +186,40 @@
 
                                         {{-- Tag Input --}}
                                         <div class="relative">
-                                            <x-input wire:model.live.debounce.300ms="tagInput" id="tag-input"
-                                                placeholder="Type to search or create tags..."
-                                                wire:keydown.enter.prevent="createTagFromInput" />
+                                            <input 
+                                                type="text" 
+                                                wire:model.live.debounce.300ms="tagInput" 
+                                                id="tag-input"
+                                                placeholder="Type to search or create tags (separate with commas)..."
+                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
+                                                x-data="{
+                                                    handleKeydown(event) {
+                                                        if (event.key === 'Enter') {
+                                                            event.preventDefault();
+                                                            if (event.target.value.trim()) {
+                                                                @this.addTag(null, event.target.value.trim());
+                                                            }
+                                                        } else if (event.key === ',') {
+                                                            event.preventDefault();
+                                                            const value = event.target.value.trim();
+                                                            if (value) {
+                                                                @this.addTag(null, value);
+                                                            }
+                                                        }
+                                                    },
+                                                    handlePaste(event) {
+                                                        setTimeout(() => {
+                                                            const value = event.target.value.trim();
+                                                            if (value.includes(',')) {
+                                                                event.target.value = '';
+                                                                @this.addMultipleTags(value);
+                                                            }
+                                                        }, 10);
+                                                    }
+                                                }"
+                                                x-on:keydown="handleKeydown($event)"
+                                                x-on:paste="handlePaste($event)"
+                                            />
 
                                             {{-- Tag Suggestions --}}
                                             @if (count($suggestedTags) > 0)
@@ -482,9 +516,14 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Set initial content if editing
-    @if($content)
-        quill.root.innerHTML = @json($content);
-    @endif
+    var initialContent = @json($content ?? '');
+    if (initialContent) {
+        // Use a small timeout to ensure Quill is fully initialized
+        setTimeout(function() {
+            quill.root.innerHTML = initialContent;
+            document.getElementById('content-input').value = initialContent;
+        }, 100);
+    }
 
     // Custom image handler
     quill.getModule('toolbar').addHandler('image', function () {
@@ -545,7 +584,22 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Update editor content when Livewire content changes
     Livewire.on('contentUpdated', function(content) {
-        quill.root.innerHTML = content;
+        if (content && content.length > 0) {
+            quill.root.innerHTML = content;
+            document.getElementById('content-input').value = content;
+        }
+    });
+
+    // Listen for Livewire component updates
+    Livewire.hook('element.updated', (el, component) => {
+        if (component.component.name === 'admin.blog.posts.post-form') {
+            // Re-sync content if needed
+            var livewireContent = @this.get('content');
+            if (livewireContent && livewireContent !== quill.root.innerHTML) {
+                quill.root.innerHTML = livewireContent;
+                document.getElementById('content-input').value = livewireContent;
+            }
+        }
     });
 });
 </script>
